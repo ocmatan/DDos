@@ -3,6 +3,7 @@ package matano.dos.client.client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Random;
@@ -28,14 +29,19 @@ public class ClientWorker implements Runnable{
             try{
                 ResponseEntity response = restTemplate.getForEntity(url+ "?clientId=" +id, String.class);
                 logger.debug("Response from server: " + response);
-                Thread.sleep(new Random().nextInt(idleTimeMaxMillis));
             }
-            catch (InterruptedException e){
-                logger.debug("InterruptedException in client worker: " + e);
-                break;
+            catch (HttpStatusCodeException e){
+                logger.debug("Http Status Exception in client worker, status: " + e.getStatusCode()+", " + e.getResponseBodyAsString());
             }
             catch (Exception e){
                 logger.warn("Exception in client worker: " + e);
+            }
+            finally {
+                try {
+                    Thread.sleep(new Random().nextInt(idleTimeMaxMillis));
+                }catch (InterruptedException e){
+                    logger.debug("InterruptedException in client worker: " + e);
+                }
             }
         }
     }

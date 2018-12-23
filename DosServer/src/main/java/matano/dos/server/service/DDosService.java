@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class DDosService {
 
     @Autowired
-    UserEntryRepository userEntryRepository;
+    UserTimeFrameRepository userEntryRepository;
 
     public ResponseEntity<String> handleRequest(int clientId, LocalDateTime timestamp){
         System.out.println("incoming request: " + clientId);
