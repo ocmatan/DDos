@@ -1,28 +1,41 @@
 package matano.dos.client.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Random;
+
 public class ClientWorker implements Runnable{
 
+    Logger logger = LoggerFactory.getLogger(ClientWorker.class);
     private int id;
     private RestTemplate restTemplate = new RestTemplate();
     private String url;
+    private int idleTimeMaxMillis;
 
-    public ClientWorker(int id, String url) {
+    public ClientWorker(int id, String url, int idleTimeMaxMillis) {
         this.id = id;
         this.url = url;
+        this.idleTimeMaxMillis = idleTimeMaxMillis;
     }
 
     @Override
     public void run(){
-        while(true){
+        logger.debug("running with id: " + id);
+        while(!Thread.currentThread().isInterrupted()){
             try{
                 ResponseEntity response = restTemplate.getForEntity(url+ "?clientId=" +id, String.class);
-                System.out.println("response: " + response);
-                Thread.sleep(2000);
-            }catch (Exception e){
-                System.out.println("Exception: " + e);
+                logger.debug("Response from server: " + response);
+                Thread.sleep(new Random().nextInt(idleTimeMaxMillis));
+            }
+            catch (InterruptedException e){
+                logger.debug("InterruptedException in client worker: " + e);
+                break;
+            }
+            catch (Exception e){
+                logger.warn("Exception in client worker: " + e);
             }
         }
     }
