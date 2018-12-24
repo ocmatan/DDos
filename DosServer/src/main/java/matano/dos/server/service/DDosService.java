@@ -20,8 +20,10 @@ public class DDosService {
         switch(resultStatus){
             case OK:
                 result = new ResponseEntity<String>(HttpStatus.OK.getReasonPhrase(),HttpStatus.OK);
+                break;
             case TRESHOLD_EXCEEDED:
                 result = new ResponseEntity<String>(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase(),HttpStatus.SERVICE_UNAVAILABLE);
+                break;
         }
         return result;
     }
