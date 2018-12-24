@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Service
 public class DDosService {
 
-    Logger logger = LoggerFactory.getLogger(DDosService.class);
+    private Logger logger = LoggerFactory.getLogger(DDosService.class);
 
     @Autowired
-    UserTimeFrameRepository userEntryRepository;
+    private UserTimeFrameRepository userEntryRepository;
 
     public ResponseEntity<String> handleRequest(int clientId, LocalDateTime timestamp){
         logger.debug("Start handleRequest for clientId " + " and ts=" + timestamp);

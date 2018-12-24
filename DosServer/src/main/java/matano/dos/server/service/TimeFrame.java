@@ -25,7 +25,7 @@ public class TimeFrame {
         return requestCounter;
     }
 
-    public void setRequestCounter(int newCount){
-        this.requestCounter = newCount;
+    public void incrementCounter(){
+        this.requestCounter++;
     }
 }

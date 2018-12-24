@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 @RestController
 public class ApiController {
 
-    Logger logger = LoggerFactory.getLogger(ApiController.class);
+    private Logger logger = LoggerFactory.getLogger(ApiController.class);
 
     @Autowired
-    DDosService dDosService;
+    private DDosService dDosService;
 
     @RequestMapping(method =  RequestMethod.GET, value = "/")
     public ResponseEntity<String> interceptRequest(@RequestParam int clientId){

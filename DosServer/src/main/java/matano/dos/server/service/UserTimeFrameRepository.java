@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Repository
 public class UserTimeFrameRepository {
 
-    Logger logger = LoggerFactory.getLogger(UserTimeFrameRepository.class);
+    private Logger logger = LoggerFactory.getLogger(UserTimeFrameRepository.class);
 
     private Map<Integer, MapEntry> map = new ConcurrentHashMap<>();
 
@@ -23,7 +23,7 @@ public class UserTimeFrameRepository {
     @Value("${app.timeFrameTreshold}")
     private int timeFrameTreshold;
     @Value("${app.timeFrameLengthInSeconds}")
-    int timeFrameLengthInSeconds;
+    private int timeFrameLengthInSeconds;
 
 
     public StatusEnum insert(int clientId, LocalDateTime timestamp){
@@ -31,36 +31,48 @@ public class UserTimeFrameRepository {
         MapEntry mapEntry = map.get(clientId);
         try{
             if(mapEntry == null){
-                try{
-                    newRecordLock.lock();
-                    mapEntry = new MapEntry();
-                    if(map.get(clientId) == null){
-                        map.put(clientId, mapEntry);
-                    }
-                }finally {
-                    newRecordLock.unlock();
-                }
+                mapEntry = initMapEntry(clientId);
             }
-
             mapEntry.getLock().lock();
-
-            TimeFrame currentTimeFrame = mapEntry.getTimeFrame();
-            if( currentTimeFrame == null || (!currentTimeFrame.isInTimeFrame(timestamp)) ){
-                currentTimeFrame = new TimeFrame(timestamp, timestamp.plusSeconds(timeFrameLengthInSeconds));
-            }
-            if(currentTimeFrame.getRequestCounter() >=  timeFrameTreshold){
-                return StatusEnum.TRESHOLD_EXCEEDED;
-            }else {
-                currentTimeFrame.setRequestCounter(currentTimeFrame.getRequestCounter() + 1);
-                mapEntry.setTimeFrame(currentTimeFrame);
-                return StatusEnum.OK;
-            }
+            return updateTimeFrame(timestamp, mapEntry);
         }finally {
             if(mapEntry != null){
                 mapEntry.getLock().unlock();
             }
         }
+    }
 
+    private StatusEnum updateTimeFrame(LocalDateTime timestamp, MapEntry mapEntry){
+        TimeFrame currentTimeFrame = mapEntry.getTimeFrame();
+        if( currentTimeFrame == null || (!currentTimeFrame.isInTimeFrame(timestamp)) ){
+            currentTimeFrame = new TimeFrame(timestamp, timestamp.plusSeconds(timeFrameLengthInSeconds));
+        }
+        if(currentTimeFrame.getRequestCounter() >=  timeFrameTreshold){
+            return StatusEnum.TRESHOLD_EXCEEDED;
+        }else {
+            currentTimeFrame.incrementCounter();
+            mapEntry.setTimeFrame(currentTimeFrame);
+            return StatusEnum.OK;
+        }
+    }
+
+    private MapEntry initMapEntry(int clientId){
+        logger.debug("Initializing mao entry for: " + clientId);
+        try{
+            newRecordLock.lock();
+            if(map.get(clientId) == null){
+                MapEntry mapEntry = new MapEntry();
+                map.put(clientId, mapEntry);
+            }
+            return map.get(clientId);
+        }
+        catch (Exception e){
+            logger.error("Error while trying to init map entry:" + e);
+        }
+        finally {
+            newRecordLock.unlock();
+        }
+        return map.get(clientId);
     }
 
 }
