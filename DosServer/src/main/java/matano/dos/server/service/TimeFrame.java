@@ -25,6 +25,10 @@ public class TimeFrame {
         return requestCounter;
     }
 
+    public boolean isThresholdExceeded(int threshold){
+        return requestCounter >=  threshold;
+    }
+
     public void incrementCounter(){
         this.requestCounter++;
     }

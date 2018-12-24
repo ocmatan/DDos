@@ -20,8 +20,8 @@ public class UserTimeFrameRepository {
 
     private Lock newRecordLock = new ReentrantLock();
 
-    @Value("${app.timeFrameTreshold}")
-    private int timeFrameTreshold;
+    @Value("${app.timeFrameThreshold}")
+    private int timeFrameThreshold;
     @Value("${app.timeFrameLengthInSeconds}")
     private int timeFrameLengthInSeconds;
 
@@ -29,12 +29,16 @@ public class UserTimeFrameRepository {
     public StatusEnum insert(int clientId, LocalDateTime timestamp){
         logger.debug("Insert: "+ clientId + ", " + timestamp);
         MapEntry mapEntry = map.get(clientId);
-        try{
-            if(mapEntry == null){
+        try {
+            if (mapEntry == null) {
                 mapEntry = initMapEntry(clientId);
             }
             mapEntry.getLock().lock();
             return updateTimeFrame(timestamp, mapEntry);
+        }
+        catch(Exception e){
+            logger.error("Exception in insert: " + e);
+            throw e;
         }finally {
             if(mapEntry != null){
                 mapEntry.getLock().unlock();
@@ -47,7 +51,7 @@ public class UserTimeFrameRepository {
         if( currentTimeFrame == null || (!currentTimeFrame.isInTimeFrame(timestamp)) ){
             currentTimeFrame = new TimeFrame(timestamp, timestamp.plusSeconds(timeFrameLengthInSeconds));
         }
-        if(currentTimeFrame.getRequestCounter() >=  timeFrameTreshold){
+        if(currentTimeFrame.isThresholdExceeded(timeFrameThreshold)){
             return StatusEnum.TRESHOLD_EXCEEDED;
         }else {
             currentTimeFrame.incrementCounter();
