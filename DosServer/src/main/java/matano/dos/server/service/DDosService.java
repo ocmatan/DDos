@@ -1,5 +1,8 @@
 package matano.dos.server.service;
 
+import matano.dos.server.web.ApiController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +13,15 @@ import java.time.LocalDateTime;
 @Service
 public class DDosService {
 
+    Logger logger = LoggerFactory.getLogger(DDosService.class);
+
     @Autowired
     UserTimeFrameRepository userEntryRepository;
 
     public ResponseEntity<String> handleRequest(int clientId, LocalDateTime timestamp){
-        System.out.println("incoming request: " + clientId);
+        logger.debug("Start handleRequest for clientId " + " and ts=" + timestamp);
         StatusEnum resultStatus = userEntryRepository.insert(clientId, timestamp);
+        logger.debug("repository insert result: " + resultStatus);
         ResponseEntity<String> result = null;
         switch(resultStatus){
             case OK:
@@ -25,6 +31,7 @@ public class DDosService {
                 result = new ResponseEntity<String>(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase(),HttpStatus.SERVICE_UNAVAILABLE);
                 break;
         }
+        logger.debug("request handle is done, result:  " + result);
         return result;
     }
 }

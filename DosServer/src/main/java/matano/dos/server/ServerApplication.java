@@ -1,14 +1,19 @@
 package matano.dos.server;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class ServerApplication {
 
+    static Logger logger = LoggerFactory.getLogger(ServerApplication.class);
+
+
     public static void main(String[] args) {
-        System.out.println("Server application is starting");
+        logger.info("Server application is starting");
         SpringApplication.run(ServerApplication.class, args);
-        System.out.println("Server application has started");
+        logger.info("Server application has started");
     }
 }
