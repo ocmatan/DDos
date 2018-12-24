@@ -1,3 +1,4 @@
+logging.level.matano: DEBUG
 app:
   timeFrameTreshold: 5
   timeFrameLengthInSeconds: 5
