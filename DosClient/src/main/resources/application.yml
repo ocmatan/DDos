@@ -2,7 +2,7 @@ spring.main.web-application-type: NONE
 logging.level.matano: DEBUG
 
 app:
-  worker-idle-time-max-millis: 2000
+  worker-idle-time-max-millis: 50000
 
 server:
   url: http://localhost:8080/
